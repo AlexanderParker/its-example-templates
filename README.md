@@ -7,8 +7,10 @@ This repository contains example templates and test cases for the [Instruction T
 
 ## Structure
 
+Templates and associated variables are versioned according to their ITS specification version alignment, to allow for future specification changes.
+
 ```
-v1/
+v1.0/
 ├── templates/           # Valid test templates
 ├── templates/invalid/   # Invalid templates for error testing
 ├── templates/security/  # Malicious templates for security testing
