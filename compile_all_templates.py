@@ -43,9 +43,9 @@ class CompilationResult:
     def status_icon(self) -> str:
         """Visual indicator of compilation result."""
         if self.is_correct:
-            return "✅" if self.expected_outcome == "success" else "🛡️"
+            return "[PASS]" if self.expected_outcome == "success" else "[BLOCKED]"
         else:
-            return "❌"
+            return "[FAIL]"
 
     @property
     def status_text(self) -> str:
@@ -283,33 +283,33 @@ def main():
     # Initialize compiler
     try:
         compiler = ITSCompiler()
-        print("✓ ITS Compiler initialized")
+        print("[OK] ITS Compiler initialised")
     except Exception as e:
-        print(f"✗ Failed to initialize compiler: {e}")
+        print(f"[ERROR] Failed to initialise compiler: {e}")
         return
 
     # Load all variable files
     print("\nLoading variable files...")
     variable_files = get_variable_files()
-    print(f"✓ Loaded {len(variable_files)} variable files")
+    print(f"[OK] Loaded {len(variable_files)} variable files")
 
     # Setup output directory
     output_dir = Path("v1.0/output")
     if output_dir.exists():
         shutil.rmtree(output_dir)
-        print(f"✓ Cleared existing output directory")
+        print(f"[OK] Cleared existing output directory")
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    print(f"✓ Created output directory: {output_dir}")
+    print(f"[OK] Created output directory: {output_dir}")
 
     # Find all template files
     template_dir = Path("v1.0/templates")
     if not template_dir.exists():
-        print(f"✗ Templates directory not found: {template_dir}")
+        print(f"[ERROR] Templates directory not found: {template_dir}")
         return
 
     template_files = list(template_dir.rglob("*.json"))
-    print(f"✓ Found {len(template_files)} template files")
+    print(f"[OK] Found {len(template_files)} template files")
 
     # Compile and validate each template
     print("\nCompiling templates...")
@@ -322,7 +322,7 @@ def main():
         relative_path = template_path.relative_to(Path("v1.0"))
         expected_outcome = TemplateClassifier.get_expected_outcome(template_path)
 
-        print(f"\n📄 {relative_path}")
+        print(f"\nProcessing: {relative_path}")
         print(f"   Expected: {expected_outcome.upper()}")
 
         # Determine output path
@@ -331,7 +331,7 @@ def main():
         base_output_name = template_path.stem
 
         # Compile without variables first
-        print(f"   🔧 Compiling without variables...")
+        print(f"   Compiling without variables...")
         result_text, is_success, error_msg = compile_template(compiler, template_path)
 
         actual_outcome = "success" if is_success else "failure"
@@ -355,13 +355,13 @@ def main():
                 friendly_output += f"Technical details: {error_msg}\n\n"
                 friendly_output += "Tips:\n"
                 for tip in tips:
-                    friendly_output += f"• {tip}\n"
+                    friendly_output += f"- {tip}\n"
                 f.write(friendly_output)
 
         print(f"   {compilation_result.status_icon} {compilation_result.status_text}")
         if not compilation_result.is_correct and error_msg:
             category, description, _ = ErrorAnalyzer.analyze_error(error_msg, template_path)
-            print(f"      → {category}: {description}")
+            print(f"      Note: {category}: {description}")
 
         # Compile with variables if applicable
         if should_use_variables(template_name) and variable_files:
@@ -377,7 +377,7 @@ def main():
                 if var_name is None:
                     continue
 
-                print(f"   🔧 Compiling with variables: {var_name}...")
+                print(f"   Compiling with variables: {var_name}...")
                 variables = variable_files[var_name]
                 result_text, is_success, error_msg = compile_template(compiler, template_path, variables)
 
@@ -404,20 +404,20 @@ def main():
                         friendly_output += f"Technical details: {error_msg}\n\n"
                         friendly_output += "Tips:\n"
                         for tip in tips:
-                            friendly_output += f"• {tip}\n"
+                            friendly_output += f"- {tip}\n"
                         f.write(friendly_output)
 
                 print(f"   {var_compilation_result.status_icon} {var_compilation_result.status_text} (with {var_name})")
                 if not var_compilation_result.is_correct and error_msg:
                     category, description, _ = ErrorAnalyzer.analyze_error(error_msg, template_path)
-                    print(f"      → {category}: {description}")
+                    print(f"      Note: {category}: {description}")
 
     # Calculate results
     total_compilations = len(all_results)
     successful_compilations = sum(1 for result in all_results if result.is_correct)
     failed_compilations = total_compilations - successful_compilations
 
-    # Categorize results
+    # Categorise results
     correct_successes = sum(1 for r in all_results if r.is_correct and r.expected_outcome == "success")
     correct_failures = sum(1 for r in all_results if r.is_correct and r.expected_outcome == "failure")
     unexpected_failures = sum(1 for r in all_results if not r.is_correct and r.expected_outcome == "success")
@@ -425,44 +425,44 @@ def main():
 
     # Summary
     print("\n" + "=" * 60)
-    print("📋 COMPILATION SUMMARY")
+    print("COMPILATION SUMMARY")
     print("=" * 60)
-    print(f"📊 Total Compilations: {total_compilations}")
-    print(f"✅ Successful: {successful_compilations}")
-    print(f"❌ Issues: {failed_compilations}")
-    print(f"📈 Success Rate: {(successful_compilations/total_compilations)*100:.1f}%")
+    print(f"Total Compilations: {total_compilations}")
+    print(f"Successful: {successful_compilations}")
+    print(f"Issues: {failed_compilations}")
+    print(f"Success Rate: {(successful_compilations/total_compilations)*100:.1f}%")
 
-    print(f"\n📋 Breakdown:")
-    print(f"   ✅ Templates compiled correctly: {correct_successes}")
-    print(f"   🛡️ Invalid templates blocked correctly: {correct_failures}")
+    print(f"\nBreakdown:")
+    print(f"   Templates compiled correctly: {correct_successes}")
+    print(f"   Invalid templates blocked correctly: {correct_failures}")
     if unexpected_failures > 0:
-        print(f"   ⚠️ Valid templates failed unexpectedly: {unexpected_failures}")
+        print(f"   Valid templates failed unexpectedly: {unexpected_failures}")
     if unexpected_successes > 0:
-        print(f"   🚨 Invalid templates compiled (SECURITY ISSUE!): {unexpected_successes}")
+        print(f"   Invalid templates compiled (SECURITY ISSUE!): {unexpected_successes}")
 
     # Show issues if any
     if failed_compilations > 0:
-        print(f"\n❌ COMPILATION ISSUES:")
+        print(f"\nCOMPILATION ISSUES:")
         for result in all_results:
             if not result.is_correct:
                 var_text = f" (with {result.variable_set})" if result.variable_set else ""
-                print(f"   • {result.template_path.name}{var_text}: {result.status_text}")
+                print(f"   - {result.template_path.name}{var_text}: {result.status_text}")
                 if result.error_message:
                     category, description, _ = ErrorAnalyzer.analyze_error(result.error_message, result.template_path)
-                    print(f"     → {category}: {description}")
+                    print(f"     Note: {category}: {description}")
 
-    print(f"\n📁 Results saved to: {output_dir}")
+    print(f"\nResults saved to: {output_dir}")
 
     if failed_compilations == 0:
-        print("\n🎉 All templates compiled as expected!")
+        print("\n[SUCCESS] All templates compiled as expected!")
     elif unexpected_successes > 0:
-        print(f"\n🚨 CRITICAL: {unexpected_successes} invalid templates were not blocked!")
+        print(f"\n[CRITICAL] {unexpected_successes} invalid templates were not blocked!")
         return 1  # Exit with error code
     elif unexpected_failures > 0:
-        print(f"\n⚠️ WARNING: {unexpected_failures} valid templates failed to compile!")
+        print(f"\n[WARNING] {unexpected_failures} valid templates failed to compile!")
         return 1  # Exit with error code
     else:
-        print("\n✓ All functional templates compiled, all invalid templates correctly blocked.")
+        print("\n[OK] All functional templates compiled, all invalid templates correctly blocked.")
 
     return 0
 
