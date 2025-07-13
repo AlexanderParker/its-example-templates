@@ -14,6 +14,100 @@ from dataclasses import dataclass
 from enum import Enum
 
 try:
+    from rich.console import Console
+    from rich.text import Text
+    from rich.panel import Panel
+    from rich.table import Table
+    from rich import print as rich_print
+    console = Console()
+    RICH_AVAILABLE = True
+except ImportError:
+    # Graceful fallback when rich is not available
+    console = None
+    RICH_AVAILABLE = False
+    def rich_print(*args, **kwargs):
+        print(*args, **kwargs)
+    print("Warning: 'rich' library not found. Install with: pip install rich")
+    print("Falling back to plain text output.\n")
+
+
+class Output:
+    """Rich-powered output with graceful fallbacks."""
+    
+    @staticmethod
+    def success(text: str) -> None:
+        """Print success message."""
+        if RICH_AVAILABLE:
+            console.print(f"[bold green]{text}[/bold green]")
+        else:
+            print(text)
+    
+    @staticmethod
+    def error(text: str) -> None:
+        """Print error message."""
+        if RICH_AVAILABLE:
+            console.print(f"[bold red]{text}[/bold red]")
+        else:
+            print(text)
+    
+    @staticmethod
+    def warning(text: str) -> None:
+        """Print warning message."""
+        if RICH_AVAILABLE:
+            console.print(f"[bold yellow]{text}[/bold yellow]")
+        else:
+            print(text)
+    
+    @staticmethod
+    def info(text: str) -> None:
+        """Print info message."""
+        if RICH_AVAILABLE:
+            console.print(f"[cyan]{text}[/cyan]")
+        else:
+            print(text)
+    
+    @staticmethod
+    def highlight(text: str) -> None:
+        """Print highlighted text."""
+        if RICH_AVAILABLE:
+            console.print(f"[bold blue]{text}[/bold blue]")
+        else:
+            print(text)
+    
+    @staticmethod
+    def note(text: str) -> None:
+        """Print note text."""
+        if RICH_AVAILABLE:
+            console.print(f"[magenta]{text}[/magenta]")
+        else:
+            print(text)
+    
+    @staticmethod
+    def print(text: str) -> None:
+        """Print regular text."""
+        if RICH_AVAILABLE:
+            console.print(text)
+        else:
+            print(text)
+    
+    @staticmethod
+    def header(text: str) -> None:
+        """Print section header."""
+        if RICH_AVAILABLE:
+            console.print(f"\n[bold white on blue] {text} [/bold white on blue]")
+        else:
+            print(f"\n{text}")
+            print("=" * len(text))
+    
+    @staticmethod
+    def rule(text: str = "") -> None:
+        """Print a horizontal rule."""
+        if RICH_AVAILABLE:
+            console.rule(text, style="blue")
+        else:
+            print("-" * 60)
+
+try:
     from its_compiler import ITSCompiler, ITSValidationError, ITSCompilationError
 except ImportError:
     print("Error: its-compiler-python not found (https://github.com/AlexanderParker/its-compiler-python)")
@@ -43,23 +137,26 @@ class CompilationResult:
     def status_icon(self) -> str:
         """Visual indicator of compilation result."""
         if self.is_correct:
-            return "[PASS]" if self.expected_outcome == "success" else "[BLOCKED]"
+            if self.expected_outcome == "success":
+                return "[bold green][PASS][/bold green]" if RICH_AVAILABLE else "[PASS]"
+            else:
+                return "[bold yellow][BLOCKED][/bold yellow]" if RICH_AVAILABLE else "[BLOCKED]"
         else:
-            return "[FAIL]"
+            return "[bold red][FAIL][/bold red]" if RICH_AVAILABLE else "[FAIL]"
 
     @property
     def status_text(self) -> str:
         """Human readable status."""
         if self.is_correct:
             if self.expected_outcome == "success":
-                return "SUCCESS (compiled as expected)"
+                return "Compiled successfully"
             else:
-                return "BLOCKED (correctly rejected)"
+                return "Correctly rejected (security/validation block)"
         else:
             if self.expected_outcome == "success":
-                return "ERROR (should have compiled)"
+                return "Failed to compile (unexpected error)"
             else:
-                return "ERROR (should have been blocked)"
+                return "Compiled when it should have been blocked (security issue)"
 
 
 class TemplateClassifier:
@@ -277,43 +374,41 @@ def get_best_variable_match(template_name: str, variable_files: Dict[str, Dict[s
 
 def main():
     """Main compilation and validation process."""
-    print("ITS Template Compilation Script")
-    print("=" * 60)
+    Output.header("ITS Template Compilation Script")
 
     # Initialize compiler
     try:
         compiler = ITSCompiler()
-        print("[OK] ITS Compiler initialised")
+        Output.success("[OK] ITS Compiler initialised")
     except Exception as e:
-        print(f"[ERROR] Failed to initialise compiler: {e}")
+        Output.error(f"[ERROR] Failed to initialise compiler: {e}")
         return
 
     # Load all variable files
-    print("\nLoading variable files...")
+    Output.print("\nLoading variable files...")
     variable_files = get_variable_files()
-    print(f"[OK] Loaded {len(variable_files)} variable files")
+    Output.success(f"[OK] Loaded {len(variable_files)} variable files")
 
     # Setup output directory
     output_dir = Path("v1.0/output")
     if output_dir.exists():
         shutil.rmtree(output_dir)
-        print(f"[OK] Cleared existing output directory")
+        Output.success("[OK] Cleared existing output directory")
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    print(f"[OK] Created output directory: {output_dir}")
+    Output.success(f"[OK] Created output directory: {output_dir}")
 
     # Find all template files
     template_dir = Path("v1.0/templates")
     if not template_dir.exists():
-        print(f"[ERROR] Templates directory not found: {template_dir}")
+        Output.error(f"[ERROR] Templates directory not found: {template_dir}")
         return
 
     template_files = list(template_dir.rglob("*.json"))
-    print(f"[OK] Found {len(template_files)} template files")
+    Output.success(f"[OK] Found {len(template_files)} template files")
 
     # Compile and validate each template
-    print("\nCompiling templates...")
-    print("-" * 60)
+    Output.rule("Compiling templates")
 
     all_results = []
 
@@ -322,16 +417,15 @@ def main():
         relative_path = template_path.relative_to(Path("v1.0"))
         expected_outcome = TemplateClassifier.get_expected_outcome(template_path)
 
-        print(f"\nProcessing: {relative_path}")
-        print(f"   Expected: {expected_outcome.upper()}")
+        Output.info(f"\nProcessing: {relative_path}")
+        Output.print(f"   Expected: [bold blue]{expected_outcome.upper()}[/bold blue]" if RICH_AVAILABLE else f"   Expected: {expected_outcome.upper()}")
 
         # Determine output path
         output_subdir = output_dir / template_path.parent.relative_to(template_dir)
         output_subdir.mkdir(parents=True, exist_ok=True)
         base_output_name = template_path.stem
 
-        # Compile without variables first
-        print(f"   Compiling without variables...")
+        Output.print(f"   Compiling without variables...")
         result_text, is_success, error_msg = compile_template(compiler, template_path)
 
         actual_outcome = "success" if is_success else "failure"
@@ -358,10 +452,14 @@ def main():
                     friendly_output += f"- {tip}\n"
                 f.write(friendly_output)
 
-        print(f"   {compilation_result.status_icon} {compilation_result.status_text}")
+        if RICH_AVAILABLE:
+            console.print(f"   {compilation_result.status_icon} {compilation_result.status_text}")
+        else:
+            Output.print(f"   {compilation_result.status_icon} {compilation_result.status_text}")
+            
         if not compilation_result.is_correct and error_msg:
             category, description, _ = ErrorAnalyzer.analyze_error(error_msg, template_path)
-            print(f"      Note: {category}: {description}")
+            Output.note(f"      Note: {category}: {description}")
 
         # Compile with variables if applicable
         if should_use_variables(template_name) and variable_files:
@@ -377,7 +475,7 @@ def main():
                 if var_name is None:
                     continue
 
-                print(f"   Compiling with variables: {var_name}...")
+                Output.print(f"   Compiling with variables: {var_name}...")
                 variables = variable_files[var_name]
                 result_text, is_success, error_msg = compile_template(compiler, template_path, variables)
 
@@ -407,10 +505,14 @@ def main():
                             friendly_output += f"- {tip}\n"
                         f.write(friendly_output)
 
-                print(f"   {var_compilation_result.status_icon} {var_compilation_result.status_text} (with {var_name})")
+                if RICH_AVAILABLE:
+                    console.print(f"   {var_compilation_result.status_icon} {var_compilation_result.status_text} (with {var_name})")
+                else:
+                    Output.print(f"   {var_compilation_result.status_icon} {var_compilation_result.status_text} (with {var_name})")
+                    
                 if not var_compilation_result.is_correct and error_msg:
                     category, description, _ = ErrorAnalyzer.analyze_error(error_msg, template_path)
-                    print(f"      Note: {category}: {description}")
+                    Output.note(f"      Note: {category}: {description}")
 
     # Calculate results
     total_compilations = len(all_results)
@@ -424,45 +526,70 @@ def main():
     unexpected_successes = sum(1 for r in all_results if not r.is_correct and r.expected_outcome == "failure")
 
     # Summary
-    print("\n" + "=" * 60)
-    print("COMPILATION SUMMARY")
-    print("=" * 60)
-    print(f"Total Compilations: {total_compilations}")
-    print(f"Successful: {successful_compilations}")
-    print(f"Issues: {failed_compilations}")
-    print(f"Success Rate: {(successful_compilations/total_compilations)*100:.1f}%")
+    Output.header("COMPILATION SUMMARY")
+    
+    if RICH_AVAILABLE:
+        # Create a rich table for the summary
+        table = Table(show_header=True, header_style="bold magenta")
+        table.add_column("Metric", style="cyan")
+        table.add_column("Count", justify="right")
+        table.add_column("Status", justify="center")
+        
+        table.add_row("Total Compilations", str(total_compilations), "")
+        table.add_row("Successful", str(successful_compilations), "[green]✓[/green]")
+        table.add_row("Issues", str(failed_compilations), "[red]✗[/red]" if failed_compilations > 0 else "[green]✓[/green]")
+        
+        success_rate = (successful_compilations/total_compilations)*100
+        rate_status = "[green]✓[/green]" if failed_compilations == 0 else "[yellow]⚠[/yellow]"
+        table.add_row("Success Rate", f"{success_rate:.1f}%", rate_status)
+        
+        console.print(table)
+    else:
+        Output.print(f"Total Compilations: {total_compilations}")
+        Output.print(f"Successful: {successful_compilations}")
+        Output.print(f"Issues: {failed_compilations}")
+        success_rate = (successful_compilations/total_compilations)*100
+        Output.print(f"Success Rate: {success_rate:.1f}%")
 
-    print(f"\nBreakdown:")
-    print(f"   Templates compiled correctly: {correct_successes}")
-    print(f"   Invalid templates blocked correctly: {correct_failures}")
-    if unexpected_failures > 0:
-        print(f"   Valid templates failed unexpectedly: {unexpected_failures}")
-    if unexpected_successes > 0:
-        print(f"   Invalid templates compiled (SECURITY ISSUE!): {unexpected_successes}")
+    Output.print(f"\nBreakdown:")
+    if RICH_AVAILABLE:
+        console.print(f"   Templates compiled correctly: [green]{correct_successes}[/green]")
+        console.print(f"   Invalid templates blocked correctly: [yellow]{correct_failures}[/yellow]")
+        if unexpected_failures > 0:
+            console.print(f"   Valid templates failed unexpectedly: [red]{unexpected_failures}[/red]")
+        if unexpected_successes > 0:
+            console.print(f"   Invalid templates compiled (SECURITY ISSUE!): [bold red]{unexpected_successes}[/bold red]")
+    else:
+        Output.print(f"   Templates compiled correctly: {correct_successes}")
+        Output.print(f"   Invalid templates blocked correctly: {correct_failures}")
+        if unexpected_failures > 0:
+            Output.error(f"   Valid templates failed unexpectedly: {unexpected_failures}")
+        if unexpected_successes > 0:
+            Output.error(f"   Invalid templates compiled (SECURITY ISSUE!): {unexpected_successes}")
 
     # Show issues if any
     if failed_compilations > 0:
-        print(f"\nCOMPILATION ISSUES:")
+        Output.error("\nCOMPILATION ISSUES:")
         for result in all_results:
             if not result.is_correct:
                 var_text = f" (with {result.variable_set})" if result.variable_set else ""
-                print(f"   - {result.template_path.name}{var_text}: {result.status_text}")
+                Output.print(f"   - {result.template_path.name}{var_text}: {result.status_text}")
                 if result.error_message:
                     category, description, _ = ErrorAnalyzer.analyze_error(result.error_message, result.template_path)
-                    print(f"     Note: {category}: {description}")
+                    Output.note(f"     Note: {category}: {description}")
 
-    print(f"\nResults saved to: {output_dir}")
+    Output.info(f"\nResults saved to: {output_dir}")
 
     if failed_compilations == 0:
-        print("\n[SUCCESS] All templates compiled as expected!")
+        Output.success("\n[SUCCESS] All templates compiled as expected!")
     elif unexpected_successes > 0:
-        print(f"\n[CRITICAL] {unexpected_successes} invalid templates were not blocked!")
+        Output.error(f"\n[CRITICAL] {unexpected_successes} invalid templates were not blocked!")
         return 1  # Exit with error code
     elif unexpected_failures > 0:
-        print(f"\n[WARNING] {unexpected_failures} valid templates failed to compile!")
+        Output.warning(f"\n[WARNING] {unexpected_failures} valid templates failed to compile!")
         return 1  # Exit with error code
     else:
-        print("\n[OK] All functional templates compiled, all invalid templates correctly blocked.")
+        Output.success("\n[OK] All functional templates compiled, all invalid templates correctly blocked.")
 
     return 0
 

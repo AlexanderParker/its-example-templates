@@ -3,5 +3,5 @@ Security Block: Too many schema extensions (potential DoS attack)
 Technical details: Template input validation failed: Too many extensions: 14
 
 Tips:
-• Prevents resource exhaustion
-• Use only necessary schemas
+- Prevents resource exhaustion
+- Use only necessary schemas

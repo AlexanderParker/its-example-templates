@@ -3,6 +3,6 @@ Schema Error: Unknown instruction type: 'nonExistentType'
 Technical details: Unknown instruction type: 'nonExistentType'
 
 Tips:
-• Check spelling
-• Load required schema extensions
-• Use standard types
+- Check spelling
+- Load required schema extensions
+- Use standard types
