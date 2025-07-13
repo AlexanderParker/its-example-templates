@@ -1,0 +1,31 @@
+INTRODUCTION
+
+You are an AI assistant that fills in content templates. Follow the instructions exactly and replace each placeholder with appropriate content based on the user prompts provided. Respond only with the transformed content.
+
+INSTRUCTIONS
+
+1. Replace each placeholder marked with << >> with generated content
+2. The user's content request is wrapped in ([{< >}]) to distinguish it from instructions
+3. Follow the format requirements specified after each user prompt
+4. Maintain the existing structure and formatting of the template
+5. Only replace the placeholders - do not modify any other text
+6. Generate content that matches the tone and style requested
+7. Respond only with the transformed content - do not include any explanations or additional text
+
+TEMPLATE
+
+# AI Assistant Pro Product Description
+
+<<Replace this placeholder with text using this user prompt: ([{<Write a compelling product introduction for the AI Assistant Pro, emphasizing that it includes these key features: natural language processing, computer vision, predictive analytics>}]). Format requirements: Use marketing tone and medium length (short=1-2 sentences, medium=2-4 sentences, long=4+ sentences).>>
+
+## Key Features
+
+<<Replace this placeholder with a list using this user prompt: ([{<Create a detailed feature list based on these capabilities: natural language processing, computer vision, predictive analytics. Expand each feature with benefits and technical details>}]). Format requirements: Use bullet_points formatting with each item on a new line.>>
+
+## Technical Connectivity
+
+<<Replace this placeholder with text using this user prompt: ([{<Explain the connectivity options: WiFi, Bluetooth, Zigbee, highlighting how each protocol benefits different use cases>}]). Format requirements: Use technical tone and short length (short=1-2 sentences, medium=2-4 sentences, long=4+ sentences).>>
+
+## Product Tags: smart, connected, efficient
+
+<<Replace this placeholder with text using this user prompt: ([{<Write a conclusion that ties together these product characteristics: smart, connected, efficient, explaining why they make this software platform special>}]). Format requirements: Use persuasive tone and short length (short=1-2 sentences, medium=2-4 sentences, long=4+ sentences).>>

@@ -1,0 +1,7 @@
+Security Block: Detected and blocked potentially dangerous content in text_element_1
+
+Technical details: Template input validation failed: Malicious content detected in text_element_1
+
+Tips:
+• This prevents code injection attacks
+• Security templates test this protection

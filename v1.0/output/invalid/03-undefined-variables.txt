@@ -1,0 +1,7 @@
+Validation Error: Template contains undefined variables or invalid references
+
+Technical details: Template validation failed
+
+Tips:
+• Define all referenced variables
+• Check variable name spelling

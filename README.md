@@ -70,6 +70,28 @@ These files contain variables which test different variable-dependent functional
 | `conditional-minimal-variables.json` | Minimal variables for testing edge cases                    |
 | `complex-conditional-variables.json` | Variables for testing complex conditional expressions       |
 
+## Maintainence
+
+### Quick Start
+
+Windows:
+
+```powershell
+setup.bat
+```
+
+Linux/Mac:
+
+```bash
+./setup.sh
+```
+
+To compile:
+
+```
+python compile_all_templates.py
+```
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

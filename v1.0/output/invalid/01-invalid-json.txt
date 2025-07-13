@@ -1,0 +1,8 @@
+Syntax Error: Invalid JSON syntax at line 8
+
+Technical details: Invalid JSON in template file: Expecting property name enclosed in double quotes: line 8 column 5 (char 260)
+
+Tips:
+• Remove trailing commas
+• Add missing quotes
+• Validate JSON syntax

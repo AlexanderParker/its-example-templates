@@ -1,0 +1,7 @@
+Security Block: Variable name '__proto__' blocked for security reasons
+
+Technical details: Template input validation failed: Dangerous variable name: __proto__
+
+Tips:
+• Prevents prototype pollution attacks
+• Use safe variable names

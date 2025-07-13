@@ -1,0 +1,7 @@
+Security Block: Detected and blocked potentially dangerous content in condition_3
+
+Technical details: Template input validation failed: Malicious content detected in condition_3
+
+Tips:
+• This prevents code injection attacks
+• Security templates test this protection

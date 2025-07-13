@@ -1,0 +1,7 @@
+Schema Error: Placeholder missing required 'description' field
+
+Technical details: Template input validation failed: Placeholder element 0 config missing description
+
+Tips:
+• Add description for AI guidance
+• All placeholders need descriptions

@@ -1,0 +1,7 @@
+Schema Error: Template content array cannot be empty
+
+Technical details: Template input validation failed: Content array cannot be empty
+
+Tips:
+• Add at least one content element
+• Templates must generate something
