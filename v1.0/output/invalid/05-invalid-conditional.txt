@@ -1,7 +1,1 @@
-Security Block: Invalid conditional expression blocked for security
-
-Technical details: Security validation failed for condition 'invalid syntax here && missing quotes': Syntax error in expression: invalid syntax (<unknown>, line 1)
-
-Tips:
-- Prevents code injection via template logic
-- Check conditional syntax
+Error: Security validation failed for condition 'invalid syntax here && missing quotes': Syntax error in expression: invalid syntax (<unknown>, line 1)

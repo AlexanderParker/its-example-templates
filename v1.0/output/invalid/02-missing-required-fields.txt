@@ -1,7 +1,1 @@
-Schema Error: Missing required field: 'version'
-
-Technical details: Template input validation failed: Missing required field: version
-
-Tips:
-- Add required ITS template fields
-- Check schema requirements
+Error: Template input validation failed: Missing required field: version

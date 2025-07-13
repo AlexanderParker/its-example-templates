@@ -19,21 +19,24 @@ try:
     from rich.panel import Panel
     from rich.table import Table
     from rich import print as rich_print
+
     console = Console()
     RICH_AVAILABLE = True
 except ImportError:
     # Graceful fallback when rich is not available
     console = None
     RICH_AVAILABLE = False
+
     def rich_print(*args, **kwargs):
         print(*args, **kwargs)
+
     print("Warning: 'rich' library not found. Install with: pip install rich")
     print("Falling back to plain text output.\n")
 
 
 class Output:
     """Rich-powered output with graceful fallbacks."""
-    
+
     @staticmethod
     def success(text: str) -> None:
         """Print success message."""
@@ -41,7 +44,7 @@ class Output:
             console.print(f"[bold green]{text}[/bold green]")
         else:
             print(text)
-    
+
     @staticmethod
     def error(text: str) -> None:
         """Print error message."""
@@ -49,7 +52,7 @@ class Output:
             console.print(f"[bold red]{text}[/bold red]")
         else:
             print(text)
-    
+
     @staticmethod
     def warning(text: str) -> None:
         """Print warning message."""
@@ -57,7 +60,7 @@ class Output:
             console.print(f"[bold yellow]{text}[/bold yellow]")
         else:
             print(text)
-    
+
     @staticmethod
     def info(text: str) -> None:
         """Print info message."""
@@ -65,7 +68,7 @@ class Output:
             console.print(f"[cyan]{text}[/cyan]")
         else:
             print(text)
-    
+
     @staticmethod
     def highlight(text: str) -> None:
         """Print highlighted text."""
@@ -73,7 +76,7 @@ class Output:
             console.print(f"[bold blue]{text}[/bold blue]")
         else:
             print(text)
-    
+
     @staticmethod
     def note(text: str) -> None:
         """Print note text."""
@@ -81,7 +84,7 @@ class Output:
             console.print(f"[magenta]{text}[/magenta]")
         else:
             print(text)
-    
+
     @staticmethod
     def print(text: str) -> None:
         """Print regular text."""
@@ -89,7 +92,7 @@ class Output:
             console.print(text)
         else:
             print(text)
-    
+
     @staticmethod
     def header(text: str) -> None:
         """Print section header."""
@@ -98,7 +101,7 @@ class Output:
         else:
             print(f"\n{text}")
             print("=" * len(text))
-    
+
     @staticmethod
     def rule(text: str = "") -> None:
         """Print a horizontal rule."""
@@ -106,6 +109,7 @@ class Output:
             console.rule(text, style="blue")
         else:
             print("-" * 60)
+
 
 try:
     from its_compiler import ITSCompiler, ITSValidationError, ITSCompilationError
@@ -140,7 +144,7 @@ class CompilationResult:
             if self.expected_outcome == "success":
                 return "[bold green][PASS][/bold green]" if RICH_AVAILABLE else "[PASS]"
             else:
-                return "[bold yellow][BLOCKED][/bold yellow]" if RICH_AVAILABLE else "[BLOCKED]"
+                return "[bold green][BLOCKED][/bold green]" if RICH_AVAILABLE else "[BLOCKED]"
         else:
             return "[bold red][FAIL][/bold red]" if RICH_AVAILABLE else "[FAIL]"
 
@@ -418,7 +422,11 @@ def main():
         expected_outcome = TemplateClassifier.get_expected_outcome(template_path)
 
         Output.info(f"\nProcessing: {relative_path}")
-        Output.print(f"   Expected: [bold blue]{expected_outcome.upper()}[/bold blue]" if RICH_AVAILABLE else f"   Expected: {expected_outcome.upper()}")
+        Output.print(
+            f"   Expected: [bold blue]{expected_outcome.upper()}[/bold blue]"
+            if RICH_AVAILABLE
+            else f"   Expected: {expected_outcome.upper()}"
+        )
 
         # Determine output path
         output_subdir = output_dir / template_path.parent.relative_to(template_dir)
@@ -443,20 +451,14 @@ def main():
             if is_success:
                 f.write(result_text)
             else:
-                # For errors, provide friendly analysis
-                category, description, tips = ErrorAnalyzer.analyze_error(error_msg or "Unknown error", template_path)
-                friendly_output = f"{category}: {description}\n\n"
-                friendly_output += f"Technical details: {error_msg}\n\n"
-                friendly_output += "Tips:\n"
-                for tip in tips:
-                    friendly_output += f"- {tip}\n"
-                f.write(friendly_output)
+                # For errors, write the raw compiler error message only
+                f.write(f"Error: {error_msg}")
 
         if RICH_AVAILABLE:
             console.print(f"   {compilation_result.status_icon} {compilation_result.status_text}")
         else:
             Output.print(f"   {compilation_result.status_icon} {compilation_result.status_text}")
-            
+
         if not compilation_result.is_correct and error_msg:
             category, description, _ = ErrorAnalyzer.analyze_error(error_msg, template_path)
             Output.note(f"      Note: {category}: {description}")
@@ -495,21 +497,18 @@ def main():
                     if is_success:
                         f.write(result_text)
                     else:
-                        category, description, tips = ErrorAnalyzer.analyze_error(
-                            error_msg or "Unknown error", template_path
-                        )
-                        friendly_output = f"{category}: {description}\n\n"
-                        friendly_output += f"Technical details: {error_msg}\n\n"
-                        friendly_output += "Tips:\n"
-                        for tip in tips:
-                            friendly_output += f"- {tip}\n"
-                        f.write(friendly_output)
+                        # For errors, write the raw compiler error message only
+                        f.write(f"Error: {error_msg}")
 
                 if RICH_AVAILABLE:
-                    console.print(f"   {var_compilation_result.status_icon} {var_compilation_result.status_text} (with {var_name})")
+                    console.print(
+                        f"   {var_compilation_result.status_icon} {var_compilation_result.status_text} (with {var_name})"
+                    )
                 else:
-                    Output.print(f"   {var_compilation_result.status_icon} {var_compilation_result.status_text} (with {var_name})")
-                    
+                    Output.print(
+                        f"   {var_compilation_result.status_icon} {var_compilation_result.status_text} (with {var_name})"
+                    )
+
                 if not var_compilation_result.is_correct and error_msg:
                     category, description, _ = ErrorAnalyzer.analyze_error(error_msg, template_path)
                     Output.note(f"      Note: {category}: {description}")
@@ -527,28 +526,30 @@ def main():
 
     # Summary
     Output.header("COMPILATION SUMMARY")
-    
+
     if RICH_AVAILABLE:
         # Create a rich table for the summary
         table = Table(show_header=True, header_style="bold magenta")
         table.add_column("Metric", style="cyan")
         table.add_column("Count", justify="right")
         table.add_column("Status", justify="center")
-        
+
         table.add_row("Total Compilations", str(total_compilations), "")
         table.add_row("Successful", str(successful_compilations), "[green]✓[/green]")
-        table.add_row("Issues", str(failed_compilations), "[red]✗[/red]" if failed_compilations > 0 else "[green]✓[/green]")
-        
-        success_rate = (successful_compilations/total_compilations)*100
+        table.add_row(
+            "Issues", str(failed_compilations), "[red]✗[/red]" if failed_compilations > 0 else "[green]✓[/green]"
+        )
+
+        success_rate = (successful_compilations / total_compilations) * 100
         rate_status = "[green]✓[/green]" if failed_compilations == 0 else "[yellow]⚠[/yellow]"
         table.add_row("Success Rate", f"{success_rate:.1f}%", rate_status)
-        
+
         console.print(table)
     else:
         Output.print(f"Total Compilations: {total_compilations}")
         Output.print(f"Successful: {successful_compilations}")
         Output.print(f"Issues: {failed_compilations}")
-        success_rate = (successful_compilations/total_compilations)*100
+        success_rate = (successful_compilations / total_compilations) * 100
         Output.print(f"Success Rate: {success_rate:.1f}%")
 
     Output.print(f"\nBreakdown:")
@@ -558,7 +559,9 @@ def main():
         if unexpected_failures > 0:
             console.print(f"   Valid templates failed unexpectedly: [red]{unexpected_failures}[/red]")
         if unexpected_successes > 0:
-            console.print(f"   Invalid templates compiled (SECURITY ISSUE!): [bold red]{unexpected_successes}[/bold red]")
+            console.print(
+                f"   Invalid templates compiled (SECURITY ISSUE!): [bold red]{unexpected_successes}[/bold red]"
+            )
     else:
         Output.print(f"   Templates compiled correctly: {correct_successes}")
         Output.print(f"   Invalid templates blocked correctly: {correct_failures}")
