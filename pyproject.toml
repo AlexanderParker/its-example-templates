@@ -6,6 +6,6 @@ build-backend = "setuptools.build_meta"
 name = "its-example-templates"
 version = "1.0.0"
 dependencies = [
-    "its-compiler-python[dev] @ git+https://github.com/AlexanderParker/its-compiler-python.git",
+    "its-compiler-cli>=1.0.0",
     "rich>=13.0.0",
 ]

@@ -1,1 +1,1 @@
-Error: Template input validation failed: Placeholder element 0 config missing description
+Error: Template security validation failed: Placeholder element 0 config missing description

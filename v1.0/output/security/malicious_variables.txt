@@ -1,1 +1,1 @@
-Error: Template input validation failed: Dangerous variable name: __proto__
+Error: Template security validation failed: Dangerous variable name: __proto__

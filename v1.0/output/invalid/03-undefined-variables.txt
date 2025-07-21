@@ -1,1 +1,1 @@
-Error: Template validation failed
+Error: Undefined variable reference: ${undefinedVar}

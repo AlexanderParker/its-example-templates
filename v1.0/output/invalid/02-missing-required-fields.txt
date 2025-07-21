@@ -1,1 +1,1 @@
-Error: Template input validation failed: Missing required field: version
+Error: Template security validation failed: Missing required field: version

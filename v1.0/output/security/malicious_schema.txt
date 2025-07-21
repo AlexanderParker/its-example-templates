@@ -1,1 +1,1 @@
-Error: Template input validation failed: Too many extensions: 14
+Error: Template security validation failed: Too many extensions: 14

@@ -1,1 +1,1 @@
-Error: Template input validation failed: Malicious content detected in text_element_1
+Error: Template security validation failed: Malicious content detected in text_element_1

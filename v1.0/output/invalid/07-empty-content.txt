@@ -1,1 +1,1 @@
-Error: Template input validation failed: Content array cannot be empty
+Error: Template security validation failed: Content array cannot be empty

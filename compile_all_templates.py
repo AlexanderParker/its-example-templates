@@ -114,7 +114,7 @@ class Output:
 try:
     from its_compiler import ITSCompiler, ITSValidationError, ITSCompilationError
 except ImportError:
-    print("Error: its-compiler-python not found (https://github.com/AlexanderParker/its-compiler-python)")
+    print("Error: its-compiler not found (https://github.com/AlexanderParker/its-compiler-python)")
     exit(1)
 
 
